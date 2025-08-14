@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Didacita – Citations (EN)</title>
+  <style>
+    :root {
+      --bg: #f5f0e6; --fg: #2d1b0e;
+      --accent: #763F00; --button-bg: #a1887f; --button-fg: #fff;
+      --overlay-bg: #4e342e;
+    }
+    body[data-theme="red"] {
+      --bg:#FFD2D2; --fg:#512929;
+      --accent:#800404; --button-bg:#E00000;
+    }
+    body[data-theme="pink"] {
+      --bg:#B7FFDA; --fg:#1b5e20;
+      --accent:#EF296F; --button-bg:#266143;
+    }
+    body[data-theme="blue"] {
+      --bg:#8CCEF8; --fg:#b71c1c;
+      --accent:#003468; --button-bg:#089FFF;
+    }
+    body.dark-mode {
+      filter: invert(0.9) hue-rotate(180deg);
+    }
+    body.dark-mode img, body.dark-mode video {
+      filter: invert(0) hue-rotate(0);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background: var(--bg); color: var(--fg);
+      font-family: Arial, sans-serif;
+      display: flex; justify-content: center;
+      min-height: 100vh;
+    }
+    .container {
+      width: 100%; max-width: 700px;
+      background: var(--bg); color: var(--fg);
+      border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 1rem; position: relative;
+    }
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--accent); color: var(--button-fg);
+      padding: 0.8rem 1rem; border-radius: 6px 6px 0 0;
+    }
+    .theme-controls select, .theme-controls button {
+      margin-left: 0.5rem; padding: 0.4rem 0.8rem; font-size: 0.9rem;
+      border: none; border-radius: 4px; cursor: pointer;
+    }
+    .theme-controls button {
+      background: var(--button-bg); color: var(--button-fg);
+    }
+    .controls {
+      display: flex; justify-content: space-between; flex-wrap: wrap; margin: 1rem 0;
+    }
+    .controls button {
+      background: var(--button-bg); color: var(--button-fg);
+      border: none; padding: 0.6rem 1rem; border-radius: 6px;
+      cursor: pointer; margin: 0.3rem; font-size: 1rem;
+    }
+    #toggleSavedBtn { background: var(--accent); }
+    .quote-box {
+      font-size: 1.3rem; min-height: 4em; margin-bottom: 0.5rem;
+      padding: 0.5rem; background: rgba(0,0,0,0.05); border-radius: 6px;
+    }
+    .quote-author {
+      text-align: right; font-style: italic; margin-bottom: 1rem;
+    }
+    #savedList {
+      position: absolute; top: 4.5rem; right: 1rem;
+      background: var(--bg); color: var(--fg);
+      border: 1px solid var(--accent); border-radius: 6px;
+      width: 100%; max-width: 300px;
+      max-height: 300px; overflow-y: auto;
+      display: none; z-index: 10;
+    }
+    #savedList.show { display: block; }
+    .saved-item {
+      display: flex; justify-content: space-between; padding: 0.5rem;
+      border-bottom: 1px solid var(--accent); font-size: 0.9rem;
+    }
+    .saved-item button {
+      background: #c62828; color: white; border: none; border-radius: 4px;
+      font-size: 0.8rem; padding: 0.2rem 0.6rem; cursor: pointer;
+    }
+    footer {
+      text-align: center; padding: 1rem; font-size: 0.9rem;
+      color: var(--accent); border-top: 1px solid var(--accent); margin-top: 1rem;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body data-theme="default">
+  <div class="container">
+    <header>
+      <h1>Didacita</h1>
+      <div class="theme-controls">
+        <select id="theme-select">
+          <option value="default">Brown</option>
+          <option value="red">Red</option>
+          <option value="pink">Pink</option>
+          <option value="blue">Blue</option>
+        </select>
+        <button id="toggle-dark-mode">🌙</button>
+      </div>
+    </header>
+
+    <div class="controls">
+      <button id="newQuoteBtn">New Quote</button>
+      <button id="saveQuoteBtn">Save</button>
+      <button id="shareQuoteBtn">Share</button>
+      <button id="toggleSavedBtn">Saved Quotes ▼</button>
+      <div id="savedList"></div>
+    </div>
+
+    <div id="quoteDisplay" class="quote-box">Click "New Quote" to begin.</div>
+    <div id="authorDisplay" class="quote-author"></div>
+
+    <footer>
+      &copy; 2025 Scaraven – Didacita. All rights reserved.<br/>
+      <a href="privacy.html">Privacy Policy</a> |
+      <a href="terms.html">Terms of Use</a> |
+      <a href="contacts.html">Contact</a><br/>
+      <a href="https://www.facebook.com/share/17EBy2M5zE/" target="_blank">Facebook</a> |
+      <a href="https://www.instagram.com/didacita" target="_blank">Instagram</a> |
+      <a href="mentionen.html">Legal notices</a>
+    </footer>
+  </div>
+
+  <script>
+    const MAX_SAVED = 100;
+    const storageKey = "savedQuotes_en";
+
+    const quotes = [
+      { texte: "It is not how long but how well we live that matters.", auteur: "Jeremiah Say"},
+{ texte: "Life is not a solo but a chorus. We live in relationships from cradle to grave.", auteur: "Anon."},
+{ texte: "Life is worth living better than most men live it.", auteur: "Anon."},
+{ texte: "Live your best, and act your best, and think your best each day, for there may be no tomorrows.", auteur: "Anon."},
+{ texte: "Everything in life is a test of character.", auteur: "John Blanchard"},
+{ texte: "Life ought not merely to contain acts of worship, it should be an act of worship.", auteur: "John Blanchard"},
+{ texte: "Be such a man, and live such a life, that if every man were such as you, and every life a life like yours, this earth would be God’s paradise.", auteur: "Phillips Brooks"},
+{ texte: "The quality of life is more important than life itself.", auteur: "Alexis Carrel"},
+{ texte: "Life is too short to be small.", auteur: "Benjamin Disraeli"},
+{ texte: "The man who regards his own life and that of his fellow creatures as meaningless is not merely unfortunate but almost disqualified for life.", auteur: "Albert Einstein"},
+{ texte: "What makes life dreary is absence of motive. What makes life complicated is multiplicity of motive. What makes life victorious is singleness of motive.", auteur: "George Eliot"},
+{ texte: "Life is not measured by length but by depth. Birthdays tell us how long we have been on the road, not how far we have travelled.", auteur: "Vance Havner"},
+{ texte: "Every man’s life is his opportunity of doing that which will make for him in eternity.", auteur: "Matthew Henry"},
+{ texte: "Sow an action and you reap a habit; sow a habit and you reap a character; sow a character and you reap a destiny.", auteur: "William James"},
+{ texte: "The most important thing in life is to live your life for something more important than your life.", auteur: "William James"},
+{ texte: "The end of life is not to be happy, nor to achieve pleasure and avoid pain, but to do the will of God, come what may.", auteur: "Martin Luther King Jr."},
+{ texte: "Make sure the thing you are living for is worth dying for.", auteur: "Charles Mayes"},
+{ texte: "The seven ages of man: spills, drills, thrills, bills, ills, pills, wills.", auteur: "Richard J. Needham"},
+{ texte: "We are here to add what we can to life, not to get what we can from it.", auteur: "William Osler"},
+{ texte: "The whole of life is a test, a trial of what is in us, so arranged by God himself.", auteur: "William S. Plumer"},
+{ texte: "We are not so to live as if we had nothing but a body.", auteur: "J. C. Ryle"},
+{ texte: "The two most important days in your life are the day you are born and the day you find out why.", auteur: "Mark Twain"},
+{ texte: "We should employ our passions in the service of life, not spend life in the service of our passions.", auteur: "Richard Steele"},
+{ texte: "Let us live as people who are prepared to die, and die as people who are prepared to live.", auteur: "James S. Stewart"},
+{ texte: "Let us endeavour so to live that when we come to die even the undertaker will be sorry.", auteur: "Mark Twain"},
+{ texte: "No one can live well until they can die well.", auteur: "David Watson"},
+{ texte: "Take care of your life and the Lord will take care of your death.", auteur: "George Whitefield"},
+{ texte: "Death is not the greatest loss in life. The greatest loss is what dies inside us while we live.", auteur: "Norman Cousins"},
+{ texte: "Life can only be enjoyed as one acquires a true perspective of life and death and of the real purpose of life.", auteur: "Spiros Zodhiates"},
+{ texte: "If you want to live a happy life, tie it to a goal, not to people or things.", auteur: "Albert Einstein"},
+{ texte: "Three things in life – your health, your mission, and the people you love. That’s it.", auteur: "Naval Ravikant"},
+{ texte: "Be brave enough to live the life of your dreams according to your vision and purpose instead of the expectations and opinions of others.", auteur: "Roy T. Bennett"},
+{ texte: "The more you know who you are, and what you want, the less you let things upset you.", auteur: "Stephanie Perkins"},
+{ texte: "You can't go back and change the beginning, but you can start where you are and change the ending.", auteur: "C. S. Lewis"},
+{ texte: "You couldn’t relive your life, skipping the awful parts, without losing what made it worthwhile. You had to accept it as a whole – like the world, or the person you loved.", auteur: "Stewart O’Nan"},
+{ texte: "Life is a question and how we live it is our answer.", auteur: "Gary Keller"},
+{ texte: "See: it’s a never-ending upward spiral. And if you think at any point you’re allowed to stop climbing, I’m afraid you’re missing the point. Because the joy is in the climb itself.", auteur: "Mark Manson"},
+{ texte: "Don’t be afraid of death; be afraid of an unlived life. You don’t have to live forever, you just have to live.", auteur: "Natalie Babbitt"},
+{ texte: "Life is not a problem to be solved, but a reality to be experienced.", auteur: "Soren Kierkegaard"},
+{ texte: "Most of life is about searching, it’s not about doing. People spend too much time doing and not thinking about what they should be doing.", auteur: "Naval Ravikant"},
+{ texte: "Care about what other people think and you will always be their prisoner.", auteur: "Lao Tzu"},
+{ texte: "No tree, it is said, can grow to heaven unless its roots reach down to hell.", auteur: "Carl Jung"},
+{ texte: "Nothing in life is to be feared, it is only to be understood. Now is the time to understand more, so that we may fear less.", auteur: "Marie Curie"},
+{ texte: "In the end, it’s not the years in your life that count. It’s the life in your years.", auteur: "Abraham Lincoln"},
+{ texte: "Some people never go crazy. What truly horrible lives they must lead.", auteur: "Charles Bukowski"},
+{ texte: "To live is the rarest thing in the world. Most people exist, that is all.", auteur: "Oscar Wilde"},
+{ texte: "You don’t get to choose how you’re going to die. Or when. But you can decide how you’re going to live now.", auteur: "Joan Baez"},
+{ texte: "Not how long, but how well you have lived is the main thing.", auteur: "Seneca"},
+{ texte: "Life is not a process of discovery, but a process of creation.", auteur: "Neale Donald Walsch"},
+{ texte: "It’s not so much what we have in this life that matters. It’s what we do with what we have.", auteur: "Fred Rogers"},
+{ texte: "Keep smiling, because life is a beautiful thing and there’s so much to smile about.", auteur: "Marilyn Monroe"},
+{ texte: "The whole secret of a successful life is to find out what is one’s destiny to do, and then do it.", auteur: "Henry Ford"},
+{ texte: "A man can fail many times, but he isn’t a failure until he begins to blame somebody else.", auteur: "Jeff Olson"},
+{ texte: "It's not what we have in life but who we have in our life that matters.", auteur: "Margaret Laurence"},
+{ texte: "Life always waits for some crisis to occur before revealing itself at its most brilliant.", auteur: "Paulo Coelho"},
+{ texte: "Life is really simple, but men insist on making it complicated.", auteur: "Confucius"},
+{ texte: "Life is like a coin. You can spend it any way you wish, but you only spend it once.", auteur: "Lillian Dickson"},
+{ texte: "The less you give a damn to negative people, the more peaceful your life will become.", auteur: "Jeremiah Say"},
+{ texte: "Don't give it five minutes if you're not going to give it five years.", auteur: "Meghan Markle"},
+{ texte: "Dead people receive more flowers than the living ones because regret is stronger than gratitude.", auteur: "Anne Frank"},
+{ texte: "I've failed over and over and over again in my life and that is why I succeed.", auteur: "Michael Jordan"},
+{ texte: "In every life, we have some trouble, but when you worry you make it double.", auteur: "Bobby McFerrin"},
+{ texte: "The hardest thing to learn in life is which bridge to cross and which bridge to burn.", auteur: "David Russell"},
+{ texte: "Life doesn’t require that we be the best, only that we try our best.", auteur: "H. Jackson Brown Jr."},
+{ texte: "The best and most beautiful things in this world cannot be seen or even heard, but must be felt with the heart.", auteur: "Helen Keller"},
+{ texte: "A life spent making mistakes is not only more honorable, but more useful than a life spent doing nothing.", auteur: "George Bernard Shaw"},
+{ texte: "My mission in life is not merely to survive, but to thrive; and to do so with some passion, some compassion, some humor, and some style.", auteur: "Maya Angelou"},
+{ texte: "Life's most persistent and urgent question is, 'What are you doing for others?'", auteur: "Martin Luther King Jr."},
+{ texte: "The flower that blooms in adversity is the rarest and most beautiful of all.", auteur: "Mulan"},
+{ texte: "Life is short, live it. Love is rare, grab it. Anger is bad, dump it. Fear is awful, face it. Memory is sweet, cherish it.", auteur: "Jeremiah Say"},
+{ texte: "The greatest discovery of any generation is that a human being can alter his life by altering his attitude.", auteur: "William James"},
+{ texte: "Loving people live in a loving world. Hostile people live in a hostile world. Same world.", auteur: "Wayne Dyer"},
+{ texte: "If you don't like the road you're walking, start paving another one.", auteur: "Dolly Parton"},
+{ texte: "Life is not a matter of holding good cards, but sometimes, playing a poor hand well.", auteur: "Jack London"},
+{ texte: "The biggest adventure you can take is to live the life of your dreams.", auteur: "Oprah Winfrey"},
+{ texte: "A little foolishness, enough to enjoy life, and a little wisdom to avoid the errors, that will do.", auteur: "Osho"},
+{ texte: "A man who dares to waste one hour of time has not discovered the value of life.", auteur: "Charles Darwin"},
+{ texte: "The things you do for yourself are gone when you are gone, but the things you do for others remain as your legacy.", auteur: "Kalu Ndukwe Kalu"},
+{ texte: "By being yourself, you put something wonderful in the world that was not there before.", auteur: "Edwin Elliot"},
+{ texte: "Life moves pretty fast. If you don’t stop and look around once in a while you could miss it.", auteur: "Ferris Bueller"},
+{ texte: "The first half of life is devoted to forming a healthy ego, the second half is going inward and letting go of it.", auteur: "Carl Jung"},
+{ texte: "Cry. Forgive. Learn. Move on. Let your tears water the seeds of your future happiness.", auteur: "Steve Maraboli"},
+{ texte: "The only impossible journey is the one you never begin.", auteur: "Tony Robbins"},
+{ texte: "Life must be lived and curiosity kept alive. One must never, for whatever reason, turn his back on life.", auteur: "Eleanor Roosevelt"},
+{ texte: "Life is pretty simple: You do some stuff. Most fails. Some works. You do more of what works.", auteur: "Leonardo da Vinci"},
+{ texte: "Don’t gain the world and lose your soul, wisdom is better than silver or gold.", auteur: "Bob Marley"},
+{ texte: "Risks must be taken, because the greatest hazard in life is to risk nothing.", auteur: "Leo Buscaglia"},
+{ texte: "The most beautiful things in the world cannot be seen or even touched. They must be felt with the heart.", auteur: "Helen Keller"},
+{ texte: "Take time to enjoy the little things, for one day you may look back and realize they were the big things.", auteur: "Robert Brault"},
+{ texte: "It is better to be hated for what you are than to be loved for something you are not.", auteur: "Andre Gide"},
+{ texte: "To do the useful thing, to say the courageous thing, to contemplate the beautiful thing: that is enough for one man’s life.", auteur: "T. S. Eliot"},
+{ texte: "Life is short, and it is up to you to make it sweet.", auteur: "Sarah Louise Delany"},
+{ texte: "Life is just the same as learning to swim. Do not be afraid of making mistakes, for there is no other way of learning how to live!", auteur: "Alfred Adler"},
+{ texte: "Be willing to sacrifice what you think you have today for the life that you want tomorrow.", auteur: "Neil Strauss"},
+{ texte: "Lighten up, just enjoy life, smile more, laugh more, and don’t get so worked up about things.", auteur: "Kenneth Branagh"},
+{ texte: "The aim of life is to live, and to live means to be aware, joyously, drunkenly, serenely, divinely aware.", auteur: "Henry Miller"},
+{ texte: "You must be the change you wish to see in the world.", auteur: "Mahatma Gandhi"},
+{ texte: "Try to enjoy the great festival of life with other men!", auteur: "Epictetus"},
+{ texte: "If life is a video game, the graphics are great, but the plot is confusing and the tutorial is way too long.", auteur: "Elon Musk"},
+{ texte: "Life is so short. I would rather sing one song than interpret the thousand.", auteur: "Jack London"},
+{ texte: "A bad servant will not make a good master.", auteur: "Anon." },
+{ texte: "A good leader leads the people from above them. A great leader leads the people from within them.", auteur: "M. D. Arnold" },
+{ texte: "True leadership stems from individuality that is honestly and sometimes imperfectly expressed… Leaders should strive for authenticity over perfection.", auteur: "Sheryl Sandberg" },
+{ texte: "Great leaders are almost always great simplifiers, who can cut through argument, debate, and doubt to offer a solution everybody can understand.", auteur: "Colin Powell" },
+{ texte: "Do not follow where the path may lead. Go instead where there is no path and leave a trail.", auteur: "Ralph Waldo Emerson" },
+{ texte: "A man who wants to lead the orchestra must turn his back on the crowd.", auteur: "Max Lucado" },
+{ texte: "The greatest leader is not necessarily the one who does the greatest things. He is the one that gets the people to do the greatest things.", auteur: "Ronald Reagan" },
+{ texte: "Outstanding leaders go out of their way to boost the self-esteem of their personnel. If people believe in themselves, it's amazing what they can accomplish.", auteur: "Sam Walton" },
+{ texte: "A leader is best when people barely know he exists, when his work is done, his aim fulfilled, they will say: we did it ourselves.", auteur: "Lao Tzu" },
+{ texte: "A person always doing his or her best becomes a natural leader, just by example.", auteur: "Joe DiMaggio" },
+{ texte: "I am not afraid of an army of lions led by a sheep; I am afraid of an army of sheep led by a lion.", auteur: "Alexander the Great" },
+{ texte: "I suppose leadership at one time meant muscles; but today it means getting along with people.", auteur: "Mahatma Gandhi" },
+{ texte: "Before you are a leader, success is all about growing yourself. When you become a leader, success is all about growing others.", auteur: "Jack Welch" },
+{ texte: "The quality of a leader is reflected in the standards they set for themselves.", auteur: "Ray Kroc" },
+{ texte: "A leader takes people where they want to go. A great leader takes people where they don’t necessarily want to go, but ought to be.", auteur: "Rosalynn Carter" },
+{ texte: "Leadership is a serving relationship that has the effect of facilitating human development.", auteur: "Ted Ward" },
+{ texte: "Great leaders are almost always great simplifiers, who can cut through argument, debate and doubt to offer a solution everybody can understand.", auteur: "Gen. Colin Powell" },
+{ texte: "If your actions inspire others to dream more, learn more, do more and become more, you are a leader.", auteur: "John Quincy Adams" },
+{ texte: "The challenge of leadership is to be strong, but not rude; be kind, but not weak; be bold, but not a bully; be thoughtful, but not lazy; be humble, but not timid; be proud, but not arrogant; have humor, but without folly.", auteur: "Jim Rohn" },
+{ texte: "One of the tests of leadership is the ability to recognize a problem before it becomes an emergency.", auteur: "Arnold Glasow" },
+{ texte: "You manage things; you lead people.", auteur: "Grace Murray Hopper" },
+{ texte: "Management is doing things right; leadership is doing the right things.", auteur: "Peter Drucker" },
+{ texte: "Leadership is not about titles, positions, or flowcharts. It is about one life influencing another.", auteur: "John C. Maxwell" },
+{ texte: "The best executive is the one who has sense enough to pick good men to do what he wants done, and self-restraint to keep from meddling with them while they do it.", auteur: "Theodore Roosevelt" },
+{ texte: "A genuine leader is not a searcher for consensus but a molder of consensus.", auteur: "Martin Luther King Jr." },
+{ texte: "The function of leadership is to produce more leaders, not more followers.", auteur: "Ralph Nader" },
+{ texte: "Innovation distinguishes between a leader and a follower.", auteur: "Steve Jobs" },
+{ texte: "You don’t have to hold a position in order to be a leader.", auteur: "Henry Ford" },
+{ texte: "The key to successful leadership today is influence, not authority.", auteur: "Kenneth Blanchard" },
+{ texte: "Effective leadership is not about making speeches or being liked; leadership is defined by results not attributes.", auteur: "Peter Drucker" },
+{ texte: "As we look ahead into the next century, leaders will be those who empower others.", auteur: "Bill Gates" },
+{ texte: "A leader is one who knows the way, goes the way, and shows the way.", auteur: "John C. Maxwell" },
+{ texte: "Leaders think and talk about the solutions. Followers think and talk about the problems.", auteur: "Brian Tracy" },
+{ texte: "Leadership is the capacity to translate vision into reality.", auteur: "Warren Bennis" },
+{ texte: "A great person attracts great people and knows how to hold them together.", auteur: "Johann Wolfgang von Goethe" },
+{ texte: "The supreme quality for leadership is unquestionably integrity. Without it, no real success is possible.", auteur: "Dwight D. Eisenhower" },
+{ texte: "People buy into the leader before they buy into the vision.", auteur: "John C. Maxwell" },
+{ texte: "Leadership and learning are indispensable to each other.", auteur: "John F. Kennedy" },
+{ texte: "The art of leadership is saying no, not yes. It is very easy to say yes.", auteur: "Tony Blair" },
+{ texte: "The price of greatness is responsibility.", auteur: "Winston Churchill" }
+    ];
+
+    const newBtn = document.getElementById("newQuoteBtn"),
+          saveBtn = document.getElementById("saveQuoteBtn"),
+          shareBtn = document.getElementById("shareQuoteBtn"),
+          quoteBox = document.getElementById("quoteDisplay"),
+          authorBox = document.getElementById("authorDisplay"),
+          toggleSavedBtn = document.getElementById("toggleSavedBtn"),
+          savedList = document.getElementById("savedList"),
+          themeSelect = document.getElementById("theme-select"),
+          darkToggle = document.getElementById("toggle-dark-mode");
+
+    function randQuote() {
+      return quotes[Math.floor(Math.random() * quotes.length)];
+    }
+
+    function showQuote() {
+      const q = randQuote();
+      quoteBox.textContent = q.texte;
+      authorBox.textContent = `— ${q.auteur}`;
+    }
+
+    function getSaved() {
+      return JSON.parse(localStorage.getItem(storageKey) || "[]");
+    }
+
+    function saveCurrent() {
+      const t = quoteBox.textContent;
+      if (!t || t.includes("Click")) return;
+      const arr = getSaved();
+      if (arr.find(x => x.texte === t)) return alert("Already saved.");
+      if (arr.length >= MAX_SAVED) return alert("Limit of 100 reached.");
+      arr.push({ texte: t, auteur: authorBox.textContent });
+      localStorage.setItem(storageKey, JSON.stringify(arr));
+      renderSaved();
+    }
+
+    function deleteSaved(i) {
+      const arr = getSaved(); arr.splice(i, 1);
+      localStorage.setItem(storageKey, JSON.stringify(arr));
+      renderSaved();
+    }
+
+    function renderSaved() {
+      const arr = getSaved();
+      savedList.innerHTML = arr.length
+        ? arr.map((q,i)=>`
+            <div class="saved-item">
+              <span>${q.texte}</span>
+              <button onclick="deleteSaved(${i})">Delete</button>
+            </div>
+          `).join("")
+        : "<p style='padding:0.5rem;'>No saved quotes.</p>";
+    }
+
+    function shareQuote() {
+      const t = quoteBox.textContent;
+      if (!t || t.includes("Click")) return;
+      const full = t + " " + authorBox.textContent;
+      navigator.share
+        ? navigator.share({ text: full }).catch(console.error)
+        : prompt("Copy this quote:", full);
+    }
+
+    newBtn.onclick = showQuote;
+    saveBtn.onclick = saveCurrent;
+    shareBtn.onclick = shareQuote;
+    toggleSavedBtn.onclick = () => {
+      savedList.classList.toggle("show");
+      renderSaved();
+    };
+
+    window.deleteSaved = deleteSaved;
+
+    themeSelect.onchange = () => {
+      const v = themeSelect.value;
+      localStorage.setItem("selectedTheme_en", v);
+      document.body.setAttribute("data-theme", v);
+    };
+    const savedTheme = localStorage.getItem("selectedTheme_en");
+    if (savedTheme) {
+      themeSelect.value = savedTheme;
+      document.body.setAttribute("data-theme", savedTheme);
+    }
+
+    darkToggle.onclick = () => {
+      const dark = document.body.classList.toggle("dark-mode");
+      darkToggle.textContent = dark ? "☀️" : "🌙";
+      localStorage.setItem("darkMode_en", dark);
+    };
+    if (localStorage.getItem("darkMode_en") === "true") {
+      document.body.classList.add("dark-mode");
+      darkToggle.textContent = "☀️";
+    }
+  </script>
+</body>
+</html>

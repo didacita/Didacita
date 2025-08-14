@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Didacita</title>
+  <style>
+    /* Thèmes */
+    :root {
+      --bg: #f5f0e6;
+      --fg: #2d1b0e;
+      --accent: #763F00;
+      --button-bg: #a1887f;
+      --button-fg: #fff;
+      --overlay-bg: #4e342e;
+      --pause-btn: #ddd1c4;
+      --success: #c8e6c9;
+      --wrong: #ffcdd2;
+    }
+    body[data-theme="red"] {
+      --bg: #FFD2D2;
+      --fg: #512929;
+      --accent: #800404;
+      --button-bg: #E00000;
+     --overlay-bg: #800404;
+    }
+    body[data-theme="pink"] {
+      --bg: #B7FFDA;
+      --fg: #1b5e20;
+      --accent: #EF296F;
+      --button-bg: #266143;
+      --overlay-bg: #EF296F;
+    }
+    body[data-theme="blue"] {
+      --bg: #8CCEF8;
+      --fg: #b71c1c;
+      --accent: #003468;
+      --button-bg: #089FFF;
+      --overlay-bg: #003468;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+.container {
+  max-width: 700px;
+  width: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  overflow: hidden;
+
+    }
+    header {
+      background: var(--accent);
+      color: var(--button-fg);
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header .controls button {
+      background: var(--button-bg);
+      color: var(--button-fg);
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: 0.5rem;
+      transition: transform 0.2s;
+    }
+    header .controls button:hover {
+      transform: scale(1.05);
+    }
+    main { padding: 1rem; }
+    .info {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    #word-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .word {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      background: var(--accent);
+      color: var(--button-fg);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .word.fixed {
+      cursor: default;
+      opacity: 0.6;
+    }
+    #author {
+      text-align: center;
+      font-style: italic;
+      margin-bottom: 1rem;
+    }
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .buttons button {
+      background: var(--button-bg);
+      color: var(--button-fg);
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      flex: 1;
+      min-width: 100px;
+      transition: transform 0.2s;
+    }
+    .buttons button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    #feedback {
+      text-align: center;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 6px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    #feedback.show { opacity: 1; }
+    .overlay {
+      display: none;
+      position: fixed;
+      top:0; left:0; right:0; bottom:0;
+      background: var(--overlay-bg);
+      color: var(--button-fg);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 1000;
+    }
+    .overlay.visible { display: flex; }
+    .overlay button {
+      background: var(--bg);
+      color: var(--fg);
+      padding: 1rem 2rem;
+      margin: 0.5rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .overlay ul {
+  list-style: none;
+  background: var(--bg);
+  color: var(--fg);
+  padding: 1rem;
+  max-height: 60vh;
+  overflow-y: auto;
+  width: 90%;
+  max-width: 600px;
+  border-radius: 6px;
+  margin: 1rem 0;
+}
+    .overlay li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #ccc;
+border-bottom: 1px solid var(--accent);
+   border-bottom: 1px solid var(--accent); 
+}
+body.dark-mode[data-theme="default"] {
+  --bg: #2F1905;
+  --fg: #f5f0e6;
+  --accent: #984A00;
+  --button-bg: #864E00;
+  --button-fg: #F3E5D3;
+}
+
+body.dark-mode[data-theme="red"] {
+  --bg: #510000;
+  --fg: #d0f8ce;
+  --primary: #FFFBFB;
+  --accent: #B40F0F;
+  --text: #FCEC00;
+  --overlay-accent: #FCEC00;
+}
+
+body.dark-mode[data-theme="pink"] {
+  --bg: #1b2b1b;
+  --fg: #d0f8ce;
+  --accent: #B90048;
+  --button-bg: #CC306D;
+}
+
+body.dark-mode[data-theme="blue"] {
+  --bg: #05002B;
+  --fg: #ffcccb;
+  --accent: #1200A0;
+  --button-bg: #1900E2;
+}
+.word.shrink {
+  transform: scale(0.85);
+  transition: transform 0.1s ease;
+}
+#game-over-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  text-align: center;
+}
+
+#game-over-overlay.visible {
+  display: flex;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.game-over-content {
+  background: #222;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 0 20px #000;
+  animation: popIn 0.4s ease;
+}
+
+#replay-btn {
+  margin-top: 1rem;
+  padding: 0.8rem 1.5rem;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #f1356d;
+  color: white;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes popIn {
+  from { transform: scale(0.7); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+  </style>
+</head>
+<body data-theme="default">
+  <!-- Overlays -->
+  <div id="pauseOverlay" class="overlay">
+    <label>
+      Thème :
+      <select id="theme-select">
+        <option value="default">Brown</option>
+        <option value="red">Red</option>
+        <option value="pink">Pink</option>
+        <option value="blue">Blue</option>
+      </select>
+    </label>
+    <button id="resume-btn">Resume</button>
+    <button id="home-btn">Home</button>
+    <button id="restart-btn">Restart</button>
+<button id="toggle-sound-btn">Disable Sounds</button>
+    <button id="history-btn">Historique</button>
+    <button id="fav-btn">Favorites</button>
+  </div>
+  <div id="favoris-list" class="overlay">
+    <ul id="fav-items"></ul>
+    <button id="close-fav">Close</button>
+  </div>
+  <div id="history-list" class="overlay">
+    <ul id="hist-items"></ul>
+    <button id="close-hist">Close</button>
+  </div>
+
+  <!-- Main container -->
+  <div class="container">
+    <header>
+      <h1>Didacita</h1>
+      <div class="controls">
+  <button id="freeze-btn">⏸️</button>
+  <button id="pause-btn">Menu</button>
+  <button id="toggle-dark-mode">🌙</button>
+</div>
+    </header>
+    <main>
+      <div class="info">
+        <div>⏱ Time : <span id="timer">60</span>s</div>
+        <div>🎯 Score : <span id="score">0</span></div>
+        <div>🏆 Best : <span id="best">0</span></div>
+        <div>🃏 Joker : <span id="joker-count">1</span></div>
+        <div>💡 Hint : <span id="hint-count">3</span></div>
+      </div>
+      <div id="word-container"></div>
+      <div id="author"></div>
+      <div class="buttons">
+        <button id="hint-btn">Hint</button>
+        <button id="joker-btn">Skip (Joker)</button>
+        <button id="fav-prev-btn">⭐Previous Quote</button>
+      </div>
+      <div id="feedback"></div>
+<div id="previous-quote" style="text-align: center; font-style: italic; opacity: 0.7; margin-top: 1rem;"></div>
+    </main>
+<footer style="text-align:center; padding: 1rem; font-size: 0.9rem; color: var(--accent);">
+  <p>&copy; 2025 Scaraven - Didacita. All rights reserved.</p>
+  <p>
+    <a href="privacy.html" style="color:var(--accent);">Privacy Policy</a> |
+    <a href="terms.html" style="color:var(--accent);">Terms of Use</a> |
+    <a href="contacts.html" style="color:var(--accent);">Contact</a>
+  </p>
+  <p>
+    <a href="https://www.facebook.com/share/17EBy2M5zE/" target="_blank" style="color:var(--accent);">Facebook</a> |
+    <a href="https://www.instagram.com/didacita" target="_blank" style="color:var(--accent);">Instagram</a> |
+    <a href="mentionen.html" style="color:var(--accent);">Legal notices</a>
+  </p>
+</footer>
+  </div>
+
+  <script>
+const pageID = "normalen"; // identifiant unique pour cette page
+
+let soundEnabled = localStorage.getItem("soundEnabled") !== "false"; // par défaut: activé
+
+const clickSound = new Audio("tap.wav");
+const correctSound = new Audio("correct.wav");
+const failSound = new Audio("fin.wav");
+const bestSound = new Audio("best.wav");
+
+const citations = [
+  { texte: "It is not how long but how well we live that matters.", auteur: "Jeremiah Say"},
+{ texte: "Life is not a solo but a chorus. We live in relationships from cradle to grave.", auteur: "Anon."},
+{ texte: "Life is worth living better than most men live it.", auteur: "Anon."},
+{ texte: "Live your best, and act your best, and think your best each day, for there may be no tomorrows.", auteur: "Anon."},
+{ texte: "Everything in life is a test of character.", auteur: "John Blanchard"},
+{ texte: "Life ought not merely to contain acts of worship, it should be an act of worship.", auteur: "John Blanchard"},
+{ texte: "Be such a man, and live such a life, that if every man were such as you, and every life a life like yours, this earth would be God’s paradise.", auteur: "Phillips Brooks"},
+{ texte: "The quality of life is more important than life itself.", auteur: "Alexis Carrel"},
+{ texte: "Life is too short to be small.", auteur: "Benjamin Disraeli"},
+{ texte: "The man who regards his own life and that of his fellow creatures as meaningless is not merely unfortunate but almost disqualified for life.", auteur: "Albert Einstein"},
+{ texte: "What makes life dreary is absence of motive. What makes life complicated is multiplicity of motive. What makes life victorious is singleness of motive.", auteur: "George Eliot"},
+{ texte: "Life is not measured by length but by depth. Birthdays tell us how long we have been on the road, not how far we have travelled.", auteur: "Vance Havner"},
+{ texte: "Every man’s life is his opportunity of doing that which will make for him in eternity.", auteur: "Matthew Henry"},
+{ texte: "Sow an action and you reap a habit; sow a habit and you reap a character; sow a character and you reap a destiny.", auteur: "William James"},
+{ texte: "The most important thing in life is to live your life for something more important than your life.", auteur: "William James"},
+{ texte: "The end of life is not to be happy, nor to achieve pleasure and avoid pain, but to do the will of God, come what may.", auteur: "Martin Luther King Jr."},
+{ texte: "Make sure the thing you are living for is worth dying for.", auteur: "Charles Mayes"},
+{ texte: "The seven ages of man: spills, drills, thrills, bills, ills, pills, wills.", auteur: "Richard J. Needham"},
+{ texte: "We are here to add what we can to life, not to get what we can from it.", auteur: "William Osler"},
+{ texte: "The whole of life is a test, a trial of what is in us, so arranged by God himself.", auteur: "William S. Plumer"},
+{ texte: "We are not so to live as if we had nothing but a body.", auteur: "J. C. Ryle"},
+{ texte: "The two most important days in your life are the day you are born and the day you find out why.", auteur: "Mark Twain"},
+{ texte: "We should employ our passions in the service of life, not spend life in the service of our passions.", auteur: "Richard Steele"},
+{ texte: "Let us live as people who are prepared to die, and die as people who are prepared to live.", auteur: "James S. Stewart"},
+{ texte: "Let us endeavour so to live that when we come to die even the undertaker will be sorry.", auteur: "Mark Twain"},
+{ texte: "No one can live well until they can die well.", auteur: "David Watson"},
+{ texte: "Take care of your life and the Lord will take care of your death.", auteur: "George Whitefield"},
+{ texte: "Death is not the greatest loss in life. The greatest loss is what dies inside us while we live.", auteur: "Norman Cousins"},
+{ texte: "Life can only be enjoyed as one acquires a true perspective of life and death and of the real purpose of life.", auteur: "Spiros Zodhiates"},
+{ texte: "If you want to live a happy life, tie it to a goal, not to people or things.", auteur: "Albert Einstein"},
+{ texte: "Three things in life – your health, your mission, and the people you love. That’s it.", auteur: "Naval Ravikant"},
+{ texte: "Be brave enough to live the life of your dreams according to your vision and purpose instead of the expectations and opinions of others.", auteur: "Roy T. Bennett"},
+{ texte: "The more you know who you are, and what you want, the less you let things upset you.", auteur: "Stephanie Perkins"},
+{ texte: "You can't go back and change the beginning, but you can start where you are and change the ending.", auteur: "C. S. Lewis"},
+{ texte: "You couldn’t relive your life, skipping the awful parts, without losing what made it worthwhile. You had to accept it as a whole – like the world, or the person you loved.", auteur: "Stewart O’Nan"},
+{ texte: "Life is a question and how we live it is our answer.", auteur: "Gary Keller"},
+{ texte: "See: it’s a never-ending upward spiral. And if you think at any point you’re allowed to stop climbing, I’m afraid you’re missing the point. Because the joy is in the climb itself.", auteur: "Mark Manson"},
+{ texte: "Don’t be afraid of death; be afraid of an unlived life. You don’t have to live forever, you just have to live.", auteur: "Natalie Babbitt"},
+{ texte: "Life is not a problem to be solved, but a reality to be experienced.", auteur: "Soren Kierkegaard"},
+{ texte: "Most of life is about searching, it’s not about doing. People spend too much time doing and not thinking about what they should be doing.", auteur: "Naval Ravikant"},
+{ texte: "Care about what other people think and you will always be their prisoner.", auteur: "Lao Tzu"},
+{ texte: "No tree, it is said, can grow to heaven unless its roots reach down to hell.", auteur: "Carl Jung"},
+{ texte: "Nothing in life is to be feared, it is only to be understood. Now is the time to understand more, so that we may fear less.", auteur: "Marie Curie"},
+{ texte: "In the end, it’s not the years in your life that count. It’s the life in your years.", auteur: "Abraham Lincoln"},
+{ texte: "Some people never go crazy. What truly horrible lives they must lead.", auteur: "Charles Bukowski"},
+{ texte: "To live is the rarest thing in the world. Most people exist, that is all.", auteur: "Oscar Wilde"},
+{ texte: "You don’t get to choose how you’re going to die. Or when. But you can decide how you’re going to live now.", auteur: "Joan Baez"},
+{ texte: "Not how long, but how well you have lived is the main thing.", auteur: "Seneca"},
+{ texte: "Life is not a process of discovery, but a process of creation.", auteur: "Neale Donald Walsch"},
+{ texte: "It’s not so much what we have in this life that matters. It’s what we do with what we have.", auteur: "Fred Rogers"},
+{ texte: "Keep smiling, because life is a beautiful thing and there’s so much to smile about.", auteur: "Marilyn Monroe"},
+{ texte: "The whole secret of a successful life is to find out what is one’s destiny to do, and then do it.", auteur: "Henry Ford"},
+{ texte: "A man can fail many times, but he isn’t a failure until he begins to blame somebody else.", auteur: "Jeff Olson"},
+{ texte: "It's not what we have in life but who we have in our life that matters.", auteur: "Margaret Laurence"},
+{ texte: "Life always waits for some crisis to occur before revealing itself at its most brilliant.", auteur: "Paulo Coelho"},
+{ texte: "Life is really simple, but men insist on making it complicated.", auteur: "Confucius"},
+{ texte: "Life is like a coin. You can spend it any way you wish, but you only spend it once.", auteur: "Lillian Dickson"},
+{ texte: "The less you give a damn to negative people, the more peaceful your life will become.", auteur: "Jeremiah Say"},
+{ texte: "Don't give it five minutes if you're not going to give it five years.", auteur: "Meghan Markle"},
+{ texte: "Dead people receive more flowers than the living ones because regret is stronger than gratitude.", auteur: "Anne Frank"},
+{ texte: "I've failed over and over and over again in my life and that is why I succeed.", auteur: "Michael Jordan"},
+{ texte: "In every life, we have some trouble, but when you worry you make it double.", auteur: "Bobby McFerrin"},
+{ texte: "The hardest thing to learn in life is which bridge to cross and which bridge to burn.", auteur: "David Russell"},
+{ texte: "Life doesn’t require that we be the best, only that we try our best.", auteur: "H. Jackson Brown Jr."},
+{ texte: "The best and most beautiful things in this world cannot be seen or even heard, but must be felt with the heart.", auteur: "Helen Keller"},
+{ texte: "A life spent making mistakes is not only more honorable, but more useful than a life spent doing nothing.", auteur: "George Bernard Shaw"},
+{ texte: "My mission in life is not merely to survive, but to thrive; and to do so with some passion, some compassion, some humor, and some style.", auteur: "Maya Angelou"},
+{ texte: "Life's most persistent and urgent question is, 'What are you doing for others?'", auteur: "Martin Luther King Jr."},
+{ texte: "The flower that blooms in adversity is the rarest and most beautiful of all.", auteur: "Mulan"},
+{ texte: "Life is short, live it. Love is rare, grab it. Anger is bad, dump it. Fear is awful, face it. Memory is sweet, cherish it.", auteur: "Jeremiah Say"},
+{ texte: "The greatest discovery of any generation is that a human being can alter his life by altering his attitude.", auteur: "William James"},
+{ texte: "Loving people live in a loving world. Hostile people live in a hostile world. Same world.", auteur: "Wayne Dyer"},
+{ texte: "If you don't like the road you're walking, start paving another one.", auteur: "Dolly Parton"},
+{ texte: "Life is not a matter of holding good cards, but sometimes, playing a poor hand well.", auteur: "Jack London"},
+{ texte: "The biggest adventure you can take is to live the life of your dreams.", auteur: "Oprah Winfrey"},
+{ texte: "A little foolishness, enough to enjoy life, and a little wisdom to avoid the errors, that will do.", auteur: "Osho"},
+{ texte: "A man who dares to waste one hour of time has not discovered the value of life.", auteur: "Charles Darwin"},
+{ texte: "The things you do for yourself are gone when you are gone, but the things you do for others remain as your legacy.", auteur: "Kalu Ndukwe Kalu"},
+{ texte: "By being yourself, you put something wonderful in the world that was not there before.", auteur: "Edwin Elliot"},
+{ texte: "Life moves pretty fast. If you don’t stop and look around once in a while you could miss it.", auteur: "Ferris Bueller"},
+{ texte: "The first half of life is devoted to forming a healthy ego, the second half is going inward and letting go of it.", auteur: "Carl Jung"},
+{ texte: "Cry. Forgive. Learn. Move on. Let your tears water the seeds of your future happiness.", auteur: "Steve Maraboli"},
+{ texte: "The only impossible journey is the one you never begin.", auteur: "Tony Robbins"},
+{ texte: "Life must be lived and curiosity kept alive. One must never, for whatever reason, turn his back on life.", auteur: "Eleanor Roosevelt"},
+{ texte: "Life is pretty simple: You do some stuff. Most fails. Some works. You do more of what works.", auteur: "Leonardo da Vinci"},
+{ texte: "Don’t gain the world and lose your soul, wisdom is better than silver or gold.", auteur: "Bob Marley"},
+{ texte: "Risks must be taken, because the greatest hazard in life is to risk nothing.", auteur: "Leo Buscaglia"},
+{ texte: "The most beautiful things in the world cannot be seen or even touched. They must be felt with the heart.", auteur: "Helen Keller"},
+{ texte: "Take time to enjoy the little things, for one day you may look back and realize they were the big things.", auteur: "Robert Brault"},
+{ texte: "It is better to be hated for what you are than to be loved for something you are not.", auteur: "Andre Gide"},
+{ texte: "To do the useful thing, to say the courageous thing, to contemplate the beautiful thing: that is enough for one man’s life.", auteur: "T. S. Eliot"},
+{ texte: "Life is short, and it is up to you to make it sweet.", auteur: "Sarah Louise Delany"},
+{ texte: "Life is just the same as learning to swim. Do not be afraid of making mistakes, for there is no other way of learning how to live!", auteur: "Alfred Adler"},
+{ texte: "Be willing to sacrifice what you think you have today for the life that you want tomorrow.", auteur: "Neil Strauss"},
+{ texte: "Lighten up, just enjoy life, smile more, laugh more, and don’t get so worked up about things.", auteur: "Kenneth Branagh"},
+{ texte: "The aim of life is to live, and to live means to be aware, joyously, drunkenly, serenely, divinely aware.", auteur: "Henry Miller"},
+{ texte: "You must be the change you wish to see in the world.", auteur: "Mahatma Gandhi"},
+{ texte: "Try to enjoy the great festival of life with other men!", auteur: "Epictetus"},
+{ texte: "If life is a video game, the graphics are great, but the plot is confusing and the tutorial is way too long.", auteur: "Elon Musk"},
+{ texte: "Life is so short. I would rather sing one song than interpret the thousand.", auteur: "Jack London"},
+{ texte: "A bad servant will not make a good master.", auteur: "Anon." },
+{ texte: "A good leader leads the people from above them. A great leader leads the people from within them.", auteur: "M. D. Arnold" },
+{ texte: "True leadership stems from individuality that is honestly and sometimes imperfectly expressed… Leaders should strive for authenticity over perfection.", auteur: "Sheryl Sandberg" },
+{ texte: "Great leaders are almost always great simplifiers, who can cut through argument, debate, and doubt to offer a solution everybody can understand.", auteur: "Colin Powell" },
+{ texte: "Do not follow where the path may lead. Go instead where there is no path and leave a trail.", auteur: "Ralph Waldo Emerson" },
+{ texte: "A man who wants to lead the orchestra must turn his back on the crowd.", auteur: "Max Lucado" },
+{ texte: "The greatest leader is not necessarily the one who does the greatest things. He is the one that gets the people to do the greatest things.", auteur: "Ronald Reagan" },
+{ texte: "Outstanding leaders go out of their way to boost the self-esteem of their personnel. If people believe in themselves, it's amazing what they can accomplish.", auteur: "Sam Walton" },
+{ texte: "A leader is best when people barely know he exists, when his work is done, his aim fulfilled, they will say: we did it ourselves.", auteur: "Lao Tzu" },
+{ texte: "A person always doing his or her best becomes a natural leader, just by example.", auteur: "Joe DiMaggio" },
+{ texte: "I am not afraid of an army of lions led by a sheep; I am afraid of an army of sheep led by a lion.", auteur: "Alexander the Great" },
+{ texte: "I suppose leadership at one time meant muscles; but today it means getting along with people.", auteur: "Mahatma Gandhi" },
+{ texte: "Before you are a leader, success is all about growing yourself. When you become a leader, success is all about growing others.", auteur: "Jack Welch" },
+{ texte: "The quality of a leader is reflected in the standards they set for themselves.", auteur: "Ray Kroc" },
+{ texte: "A leader takes people where they want to go. A great leader takes people where they don’t necessarily want to go, but ought to be.", auteur: "Rosalynn Carter" },
+{ texte: "Leadership is a serving relationship that has the effect of facilitating human development.", auteur: "Ted Ward" },
+{ texte: "Great leaders are almost always great simplifiers, who can cut through argument, debate and doubt to offer a solution everybody can understand.", auteur: "Gen. Colin Powell" },
+{ texte: "If your actions inspire others to dream more, learn more, do more and become more, you are a leader.", auteur: "John Quincy Adams" },
+{ texte: "The challenge of leadership is to be strong, but not rude; be kind, but not weak; be bold, but not a bully; be thoughtful, but not lazy; be humble, but not timid; be proud, but not arrogant; have humor, but without folly.", auteur: "Jim Rohn" },
+{ texte: "One of the tests of leadership is the ability to recognize a problem before it becomes an emergency.", auteur: "Arnold Glasow" },
+{ texte: "You manage things; you lead people.", auteur: "Grace Murray Hopper" },
+{ texte: "Management is doing things right; leadership is doing the right things.", auteur: "Peter Drucker" },
+{ texte: "Leadership is not about titles, positions, or flowcharts. It is about one life influencing another.", auteur: "John C. Maxwell" },
+{ texte: "The best executive is the one who has sense enough to pick good men to do what he wants done, and self-restraint to keep from meddling with them while they do it.", auteur: "Theodore Roosevelt" },
+{ texte: "A genuine leader is not a searcher for consensus but a molder of consensus.", auteur: "Martin Luther King Jr." },
+{ texte: "The function of leadership is to produce more leaders, not more followers.", auteur: "Ralph Nader" },
+{ texte: "Innovation distinguishes between a leader and a follower.", auteur: "Steve Jobs" },
+{ texte: "You don’t have to hold a position in order to be a leader.", auteur: "Henry Ford" },
+{ texte: "The key to successful leadership today is influence, not authority.", auteur: "Kenneth Blanchard" },
+{ texte: "Effective leadership is not about making speeches or being liked; leadership is defined by results not attributes.", auteur: "Peter Drucker" },
+{ texte: "As we look ahead into the next century, leaders will be those who empower others.", auteur: "Bill Gates" },
+{ texte: "A leader is one who knows the way, goes the way, and shows the way.", auteur: "John C. Maxwell" },
+{ texte: "Leaders think and talk about the solutions. Followers think and talk about the problems.", auteur: "Brian Tracy" },
+{ texte: "Leadership is the capacity to translate vision into reality.", auteur: "Warren Bennis" },
+{ texte: "A great person attracts great people and knows how to hold them together.", auteur: "Johann Wolfgang von Goethe" },
+{ texte: "The supreme quality for leadership is unquestionably integrity. Without it, no real success is possible.", auteur: "Dwight D. Eisenhower" },
+{ texte: "People buy into the leader before they buy into the vision.", auteur: "John C. Maxwell" },
+{ texte: "Leadership and learning are indispensable to each other.", auteur: "John F. Kennedy" },
+{ texte: "The art of leadership is saying no, not yes. It is very easy to say yes.", auteur: "Tony Blair" },
+{ texte: "The price of greatness is responsibility.", auteur: "Winston Churchill" }
+];
+
+let jokers = 1, hints = 3, current = null, prev = null, score = 0, 
+    best = parseInt(localStorage.getItem(pageID + "_bestScore")) || 0;
+let timeLeft = 60, historyList = [], sel = null, timerInt = null;
+let successCount = 0;
+let gameFrozen = false; // indique si le jeu est gelé
+
+const MAX_TIME = 100;
+const BONUS_TIME = 45;
+
+const get = id => document.getElementById(id),
+      wc = get("word-container"),
+      timerEl = get("timer"),
+      scoreEl = get("score"),
+      bestEl = get("best"),
+      jokerEl = get("joker-count"),
+      hintEl = get("hint-count"),
+      authorEl = get("author"),
+      fb = get("feedback");
+
+// thème sauvegardé
+const savedTheme = localStorage.getItem("selectedTheme");
+if (savedTheme) {
+  document.body.setAttribute("data-theme", savedTheme);
+  const themeSelect = get("theme-select");
+  if (themeSelect) themeSelect.value = savedTheme;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function render() {
+  timerEl.textContent = timeLeft;
+  scoreEl.textContent = score;
+  bestEl.textContent = best;
+  jokerEl.textContent = jokers;
+  hintEl.textContent = hints;
+  authorEl.textContent = current ? `— ${current.auteur}` : "";
+}
+
+function startTimer() {
+  clearInterval(timerInt);
+  timerInt = setInterval(() => {
+    if (!gameFrozen) {
+      timeLeft--;
+      render();
+      if (timeLeft <= 0) endRound(false);
+    }
+  }, 1000);
+}
+
+function buildCitation() {
+  current = citations[Math.floor(Math.random() * citations.length)];
+  wc.innerHTML = "";
+  const words = current.texte.split(" ");
+  const fixed = words.map((w, i) => /[.,;!?:]$/.test(w) ? i : -1).filter(i => i >= 0);
+  const movable = words.map((_, i) => i).filter(i => !fixed.includes(i));
+  const shuffled = shuffle(movable.map(i => words[i]));
+  let s = 0;
+  words.forEach((w, i) => {
+    const sp = document.createElement("span");
+    sp.className = fixed.includes(i) ? "word fixed" : "word";
+    sp.textContent = fixed.includes(i) ? w : shuffled[s++];
+    if (!fixed.includes(i)) sp.addEventListener("click", () => selectWord(sp));
+    wc.appendChild(sp);
+  });
+}
+
+function newCitation(startNewGame = false) {
+  clearInterval(timerInt);
+  fb.className = ""; fb.textContent = "";
+  if (startNewGame) {
+    timeLeft = 60;
+    score = 0;
+    jokers = 1;
+    hints = 3;
+    successCount = 0;
+    historyList = [];
+  }
+  render();
+  buildCitation();
+  startTimer();
+}
+
+function selectWord(el) {
+  if (gameFrozen || el.classList.contains("fixed")) return;
+
+  if (soundEnabled) clickSound.play();
+
+  el.classList.toggle("shrink");
+
+  if (el.classList.contains("selected")) {
+    el.classList.remove("selected");
+    sel = null;
+    return;
+  }
+
+  if (!sel) {
+    el.classList.add("selected");
+    sel = el;
+    return;
+  }
+
+  [sel.textContent, el.textContent] = [el.textContent, sel.textContent];
+  sel.classList.remove("selected", "shrink");
+  el.classList.remove("selected", "shrink");
+  sel = null;
+
+  const words = current.texte.split(" ");
+  [...wc.children].forEach((span, i) => {
+    if (span.textContent === words[i] && !span.classList.contains("fixed")) {
+      span.classList.add("fixed");
+      span.style.cursor = "default";
+      span.onclick = null;
+      span.style.opacity = 0.6;
+    }
+  });
+
+  if (Array.from(wc.children).map(c => c.textContent).join(" ") === current.texte) {
+    [...wc.children].forEach(span => {
+      span.classList.add("fixed");
+      span.style.cursor = "default";
+      span.onclick = null;
+    });
+    endRound(true);
+  }
+}
+
+function endRound(won) {
+  prev = current;
+  clearInterval(timerInt);
+
+  if (won) {
+    if (soundEnabled) correctSound.play();
+    timeLeft = Math.min(timeLeft + BONUS_TIME, MAX_TIME);
+    score += timeLeft * 3;
+
+    if (successCount === 3 && hints < 7) hints++;
+    if (successCount === 10 && jokers < 9) jokers++;
+    if (successCount % 5 === 0 && jokers < 3) jokers++;
+
+    successCount++;
+    historyList.push({ c: current.texte, a: current.auteur });
+    fb.textContent = "🎉 Exact !";
+    fb.style.background = "var(--success)";
+    fb.className = "show";
+    if (prev) get("previous-quote").textContent = `Dernière citation : "${prev.texte}" — ${prev.auteur}`;
+    render();
+    setTimeout(() => newCitation(false), 1000);
+  } else {
+    const isBest = score > best;
+    if (isBest) {
+      best = score;
+      localStorage.setItem(pageID + "_bestScore", best);
+    }
+
+    document.getElementById("game-over-message").textContent = isBest ? "🎉 Nouveau Record !" : "❌ Échec";
+    document.getElementById("final-score").textContent = `Score : ${score}`;
+    document.getElementById("game-over-overlay").classList.add("visible");
+
+    if (soundEnabled) (isBest ? bestSound : failSound).play();
+
+    score = 0;
+    timeLeft = 60;
+    successCount = 0;
+    render();
+  }
+}
+
+function giveHint() {
+  if (gameFrozen || hints <= 0) {
+    if (navigator.vibrate) navigator.vibrate(150);
+    return;
+  }
+
+  const words = current.texte.split(" ");
+  const spans = [...wc.children];
+
+  for (let i = 0; i < spans.length; i++) {
+    if (!spans[i].classList.contains("fixed") && spans[i].textContent !== words[i]) {
+      const correctWord = words[i];
+      const j = spans.findIndex((s, idx) =>
+        s.textContent === correctWord && !s.classList.contains("fixed") && idx !== i
+      );
+      if (j !== -1) {
+        [spans[i].textContent, spans[j].textContent] = [spans[j].textContent, spans[i].textContent];
+        spans[i].classList.add("fixed");
+        spans[i].style.opacity = 0.6;
+        spans[i].style.cursor = "default";
+        spans[i].onclick = null;
+        hints--;
+        render();
+        if (Array.from(wc.children).map(c => c.textContent).join(" ") === current.texte) {
+          endRound(true);
+        }
+        break;
+      }
+    }
+  }
+}
+
+function useJoker() {
+  if (gameFrozen || jokers <= 0) return;
+  jokers--;
+  newCitation(false);
+}
+
+function addFavPrev() {
+  if (!prev) return;
+  const fav = JSON.parse(localStorage.getItem(pageID + "_fav") || "[]");
+  if (!fav.find(f => f.c === prev.texte)) {
+    fav.push({ c: prev.texte, a: prev.auteur });
+    localStorage.setItem(pageID + "_fav", JSON.stringify(fav));
+  }
+}
+
+function showOverlay(id, list = null) {
+  clearInterval(timerInt);
+  const ov = get(id);
+  if (list) {
+    ov.querySelector("ul").innerHTML = list.map(x => `<li>${x.c} — ${x.a}</li>`).join("");
+  }
+  ov.classList.add("visible");
+}
+
+function hideOverlay(id) {
+  get(id).classList.remove("visible");
+  startTimer();
+}
+
+get("pause-btn").onclick = () => showOverlay("pauseOverlay");
+get("resume-btn").onclick = () => hideOverlay("pauseOverlay");
+get("home-btn").onclick = () => { hideOverlay("pauseOverlay"); window.location.href = "index.html"; }
+get("restart-btn").onclick = () => { hideOverlay("pauseOverlay"); newCitation(true); }
+get("history-btn").onclick = () => showOverlay("history-list", historyList);
+get("close-hist").onclick = () => hideOverlay("history-list");
+get("fav-btn").onclick = () => showOverlay("favoris-list", JSON.parse(localStorage.getItem(pageID + "_fav") || "[]"));
+get("close-fav").onclick = () => hideOverlay("favoris-list");
+get("hint-btn").onclick = giveHint;
+get("joker-btn").onclick = useJoker;
+get("fav-prev-btn").onclick = addFavPrev;
+get("theme-select").onchange = e => {
+  const theme = e.target.value;
+  document.body.setAttribute("data-theme", theme);
+  localStorage.setItem("selectedTheme", theme);
+};
+get("toggle-dark-mode").onclick = () => {
+  const isDark = document.body.classList.toggle("dark-mode");
+  get("toggle-dark-mode").textContent = isDark ? "☀️" : "🌙";
+  localStorage.setItem("darkMode", isDark);
+};
+
+const toggleSoundBtn = get("toggle-sound-btn");
+toggleSoundBtn.onclick = () => {
+  soundEnabled = !soundEnabled;
+  toggleSoundBtn.textContent = soundEnabled ? "Disable Sounds" : "Enable Sounds";
+  localStorage.setItem("soundEnabled", soundEnabled);
+};
+toggleSoundBtn.textContent = soundEnabled ? "Disable Sounds" : "Enable Sounds";
+
+const dark = localStorage.getItem("darkMode") === "true";
+if (dark) {
+  document.body.classList.add("dark-mode");
+  get("toggle-dark-mode").textContent = "☀️";
+}
+
+const saved = JSON.parse(localStorage.getItem(pageID + "_progress"));
+if (saved) {
+  score = saved.score || 0;
+  jokers = saved.jokers || 1;
+  hints = saved.hints || 3;
+  timeLeft = saved.timeLeft || 60;
+  historyList = saved.historyList || [];
+  successCount = saved.successCount || 0;
+  best = saved.best || best;
+  render();
+  buildCitation();
+  startTimer();
+} else {
+  newCitation(true);
+}
+
+// Bouton Pause/Play du jeu
+get("freeze-btn").onclick = () => {
+  gameFrozen = !gameFrozen;
+  const btn = get("freeze-btn");
+  btn.textContent = gameFrozen ? "▶️" : "⏸️";
+};
+
+const gameOverOverlay = document.createElement("div");
+gameOverOverlay.id = "game-over-overlay";
+gameOverOverlay.innerHTML = `
+  <div class="game-over-content">
+    <h2 id="game-over-message"></h2>
+    <p id="final-score"></p>
+    <button id="replay-btn">🔁 Rejouer</button>
+  </div>
+`;
+document.body.appendChild(gameOverOverlay);
+
+document.getElementById("replay-btn").onclick = () => location.reload();
+</script>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Didacita</title>
+  <style>
+    body { margin:0; font-family:'Segoe UI',sans-serif; background:#3e2723; color:#fbe9e7;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      min-height:100vh; padding:2rem 1rem; }
+    header {
+      width:100%; max-width:1000px; display:flex; justify-content:space-between; align-items:center;
+      background:#4e342e; color:#fbe9e7; padding:1rem; border-radius:8px;
+      position:absolute; top:0; left:0; right:0;
+    }
+    .dropdown { position:relative; }
+    .dropbtn {
+      background:#6d4c41; color:#fbe9e7; padding:0.6rem 1rem;
+      border:none; border-radius:6px; cursor:pointer;
+    }
+    .dropdown-content {
+      display:none; position:absolute; right:0; background:#5d4037; min-width:200px;
+      box-shadow:0 4px 10px rgba(0,0,0,0.2); border-radius:6px; overflow:hidden; z-index:1;
+    }
+    .dropdown-content a {
+      color:#fbe9e7; padding:0.8rem 1rem; text-decoration:none; display:block; background:#6d4c41;
+    }
+    .dropdown-content a:hover { background:#8d6e63; }
+    .dropdown:hover .dropdown-content { display:block; }
+    .lang-buttons {
+      display:flex; flex-wrap:wrap; gap:1.5rem; margin-top:6rem; justify-content:center;
+      flex-direction:column;
+    }
+    .lang-select {
+      background:#8d6e63; color:#fff; padding:1.2rem 2rem; font-size:1.2rem;
+      border-radius:8px; text-decoration:none; width:220px; text-align:center;
+      transition:background 0.3s;
+    }
+    .lang-select:hover { background:#a1887f; }
+    @media(min-width:600px) {
+      .lang-buttons { flex-direction:row; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Didacita</h1>
+    <div class="dropdown">
+      <button class="dropbtn">☰ Menu</button>
+      <div class="dropdown-content">
+        <a href="apropos.html">À propos</a>
+        <a href="politique.html">Politique de confidentialité</a>
+        <a href="contact.html">Contact</a>
+        <a href="conditions.html">Conditions d’utilisation</a>
+         <a href="mentionfr.html">Mentions légales</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <h2>Choisissez votre langue</h2>
+    <div class="lang-buttons">
+      <a class="lang-select" href="francais.html" onclick="saveLang('fr')">🇨🇵Français</a>
+      <a class="lang-select" href="english.html" onclick="saveLang('en')">🇬🇧English</a>
+    </div>
+  </main>
+
+<footer style="text-align:center; padding: 1rem; font-size: 0.9rem; color: #fbe9e7;">
+  <p>&copy; 2025 Scaraven - Didacita. Tous droits réservés.</p>
+  <p>
+    <a href="politique.html" style="color:#fbe9e7;">Politique de confidentialité</a> |
+    <a href="conditions.html" style="color:#fbe9e7;">Conditions d’utilisation</a> |
+    <a href="contact.html" style="color:#fbe9e7;">Contact</a>
+  </p>
+  <p>
+    <a href="https://www.facebook.com/share/17EBy2M5zE/" target="_blank" style="color:#fbe9e7;">Facebook</a> |
+    <a href="https://www.instagram.com/didacita" target="_blank" style="color:#fbe9e7;">Instagram</a> |
+    <a href="mentionfr.html" style="color:#fbe9e7;">Mentions légales</a>
+  </p>
+</footer>
+</body>
+</html>
